@@ -1,19 +1,21 @@
-source common.sh
-component=mongo
+- name:  Copy MongoDB repo file
+  ansible.builtin.copy:
+    src: mongo.repo
+    dest: /etc/yum.repos.d/mongo.repo
 
-PRINT Copy MongoDB repo file
-cp mongo.repo /etc/yum.repos.d/mongo.repo &>>$LOG_FILE
-STAT $?
+- name:  Install MongoDB
+  ansible.builtin.dnf:
+    name: mongodb-org
+    state: latest
 
-PRINT Install MongoDB
-dnf install mongodb-org -y &>>$LOG_FILE
-STAT $?
+- name:  Update MongoDB config file
+  ansible.builtin.replace:
+    path: /etc/mongod.conf
+    regexp: '127.0.0.1'
+    replace: '0.0.0.0'
 
-PRINT Update MongoDB config file
-sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf &>>$LOG_FILE
-STAT $?
-
-PRINT Start MongoDB Service
-systemctl enable mongod &>>$LOG_FILE
-systemctl restart mongod &>>$LOG_FILE
-STAT $?
+- name:  Start MongoDB Service
+  ansible.builtin.systemd_service:
+    name: mongod
+    state: restarted
+    enabled: true
