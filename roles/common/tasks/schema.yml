@@ -15,24 +15,15 @@
       ansible.builtin.shell: mongosh --host mongo.{{ env }}.kranthi.online </app/db/{{ item }}.js
       loop: "{{schema_files}}"
 
-- name: Load MySQL schema
-  when: schema_setup == "mysql"
-  block:
-    - name: Install mysql Client
-      ansible.builtin.dnf:
-        name: mysql
-        state: latest
+    - name: Load MySQL schema
+      when: schema_setup == "mysql"
+      block:
+        - name: Install mysql Client
+          ansible.builtin.dnf:
+            name: mysql
+            state: latest
 
-    - name: Debug MySQL connection
-      command: mysql -h mysql.dev.kranthi.online -u root -pRoboShop@1 -e "SHOW DATABASES;"
-      register: mysql_output
-      ignore_errors: yes
-
-    - name: Print MySQL connection output
-      debug:
-        var: mysql_output
-
-    - name: Load Master Data
-      ansible.builtin.shell: mysql -h mysql.{{ env }}.kranthi.online -uroot -pRoboShop@1 < /app/db/{{ item }}.sql
-      loop: "{{schema_files}}"
+        - name: Load Master Data
+          ansible.builtin.shell: mysql -h mysql.{{ env }}.kranthi.online -uroot -p{{ secrets.MYSQL_ROOT_PASSWORD }} < /app/db/{{ item }}.sql
+          loop: "{{schema_files}}"
 
