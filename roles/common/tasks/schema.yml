@@ -23,6 +23,16 @@
         name: mysql
         state: latest
 
+    - name: Debug MySQL connection
+      command: mysql -h mysql.dev.kranthi.online -u root -pRoboShop@1 -e "SHOW DATABASES;"
+      register: mysql_output
+      ignore_errors: yes
+
+    - name: Print MySQL connection output
+      debug:
+        var: mysql_output
+
     - name: Load Master Data
       ansible.builtin.shell: mysql -h mysql.{{ env }}.kranthi.online -uroot -pRoboShop@1 < /app/db/{{ item }}.sql
       loop: "{{schema_files}}"
+
